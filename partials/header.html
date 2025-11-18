@@ -6,14 +6,14 @@
     Contains:
     - Top bar (optional announcements)
     - Logo placeholder
-    - Navigation links
+    - Navigation with categories dropdown
     - Mobile hamburger menu
 -->
 
 <!-- Top Announcement Bar (optional - can be hidden via CSS) -->
 <div class="top-bar">
     <div class="container">
-        <span>🎉 100+ Free Calculators - No Registration Required!</span>
+        <span>100+ Free Calculators - No Registration Required!</span>
     </div>
 </div>
 
@@ -43,12 +43,25 @@
                     <li class="nav-item">
                         <a href="/" class="nav-link">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a href="/categories" class="nav-link">Categories</a>
+
+                    <!-- Categories Dropdown -->
+                    <li class="nav-item nav-dropdown" id="categoriesDropdown">
+                        <a href="#" class="nav-link nav-dropdown-toggle" id="categoriesToggle">
+                            Categories <span class="dropdown-arrow">▼</span>
+                        </a>
+                        <div class="dropdown-menu" id="categoriesMenu">
+                            <div class="dropdown-loading">Loading...</div>
+                        </div>
                     </li>
+
+                    <li class="nav-item">
+                        <a href="/#popular-calculators" class="nav-link">Popular</a>
+                    </li>
+
                     <li class="nav-item">
                         <a href="/about" class="nav-link">About</a>
                     </li>
+
                     <li class="nav-item">
                         <a href="/contact" class="nav-link">Contact</a>
                     </li>
@@ -58,9 +71,10 @@
                 <div class="nav-search">
                     <input type="search"
                            class="search-input"
+                           id="headerSearch"
                            placeholder="Search calculators..."
                            aria-label="Search calculators">
-                    <button class="search-btn" aria-label="Search">
+                    <button class="search-btn" id="headerSearchBtn" aria-label="Search">
                         🔍
                     </button>
                 </div>
@@ -70,7 +84,7 @@
     </div>
 </header>
 
-<!-- Header Styles (will move to main CSS file later) -->
+<!-- Header Styles -->
 <style>
     /* Top Bar */
     .top-bar {
@@ -128,6 +142,7 @@
         border: none;
         cursor: pointer;
         padding: 0;
+        z-index: 1001;
     }
 
     .nav-toggle-bar {
@@ -137,6 +152,19 @@
         background: #fff;
         border-radius: 2px;
         transition: all 0.3s ease;
+    }
+
+    /* Hamburger animation */
+    .nav-toggle.active .nav-toggle-bar:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    .nav-toggle.active .nav-toggle-bar:nth-child(2) {
+        opacity: 0;
+    }
+
+    .nav-toggle.active .nav-toggle-bar:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -6px);
     }
 
     /* Navigation */
@@ -171,6 +199,79 @@
 
     .nav-link:hover {
         color: #3498db;
+    }
+
+    /* Dropdown */
+    .nav-dropdown {
+        position: relative;
+    }
+
+    .nav-dropdown-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .dropdown-arrow {
+        font-size: 0.7rem;
+        margin-left: 5px;
+        transition: transform 0.3s ease;
+    }
+
+    .nav-dropdown.active .dropdown-arrow {
+        transform: rotate(180deg);
+    }
+
+    .dropdown-menu {
+        display: none;
+        background: #34495e;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+
+    .nav-dropdown.active .dropdown-menu {
+        display: block;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        color: #fff;
+        text-decoration: none;
+        font-size: 0.9rem;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        transition: background 0.2s ease;
+    }
+
+    .dropdown-item:last-child {
+        border-bottom: none;
+    }
+
+    .dropdown-item:hover {
+        background: rgba(255,255,255,0.1);
+    }
+
+    .dropdown-item-icon {
+        margin-right: 10px;
+        font-size: 1.1rem;
+    }
+
+    .dropdown-loading {
+        padding: 15px;
+        text-align: center;
+        color: rgba(255,255,255,0.6);
+        font-size: 0.85rem;
+    }
+
+    .dropdown-view-all {
+        background: rgba(52, 152, 219, 0.2);
+        font-weight: 500;
+    }
+
+    .dropdown-view-all:hover {
+        background: rgba(52, 152, 219, 0.4);
     }
 
     /* Search Box */
@@ -233,6 +334,22 @@
             color: #fff;
         }
 
+        /* Desktop Dropdown */
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 220px;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .nav-dropdown:hover .dropdown-menu,
+        .nav-dropdown.active .dropdown-menu {
+            display: block;
+        }
+
         .nav-search {
             margin-top: 0;
             margin-left: 20px;
@@ -252,27 +369,210 @@
     }
 </style>
 
-<!-- Mobile Menu Toggle Script -->
+<!-- Header Scripts -->
 <script>
-    // Mobile navigation toggle
+(function() {
+    'use strict';
+
+    // Wait for DOM
     document.addEventListener('DOMContentLoaded', function() {
-        const navToggle = document.getElementById('navToggle');
-        const mainNav = document.getElementById('mainNav');
+        initMobileMenu();
+        initCategoriesDropdown();
+        initHeaderSearch();
+        initSmoothScroll();
+    });
 
-        if (navToggle && mainNav) {
-            navToggle.addEventListener('click', function() {
-                mainNav.classList.toggle('active');
+    /**
+     * Mobile Menu Toggle
+     */
+    function initMobileMenu() {
+        var navToggle = document.getElementById('navToggle');
+        var mainNav = document.getElementById('mainNav');
+
+        if (!navToggle || !mainNav) return;
+
+        navToggle.addEventListener('click', function() {
+            navToggle.classList.toggle('active');
+            mainNav.classList.toggle('active');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!mainNav.contains(e.target) && !navToggle.contains(e.target)) {
+                navToggle.classList.remove('active');
+                mainNav.classList.remove('active');
+            }
+        });
+
+        // Close menu when clicking a link (mobile)
+        var navLinks = mainNav.querySelectorAll('.nav-link:not(.nav-dropdown-toggle)');
+        navLinks.forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (window.innerWidth < 768) {
+                    navToggle.classList.remove('active');
+                    mainNav.classList.remove('active');
+                }
             });
+        });
+    }
 
-            // Close menu when clicking a link (mobile)
-            const navLinks = mainNav.querySelectorAll('.nav-link');
-            navLinks.forEach(function(link) {
-                link.addEventListener('click', function() {
-                    if (window.innerWidth < 768) {
-                        mainNav.classList.remove('active');
-                    }
-                });
+    /**
+     * Categories Dropdown
+     */
+    function initCategoriesDropdown() {
+        var dropdown = document.getElementById('categoriesDropdown');
+        var toggle = document.getElementById('categoriesToggle');
+        var menu = document.getElementById('categoriesMenu');
+
+        if (!dropdown || !toggle || !menu) return;
+
+        var categoriesLoaded = false;
+
+        // Toggle dropdown on click (mobile)
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Load categories on first open
+            if (!categoriesLoaded) {
+                loadCategories();
+                categoriesLoaded = true;
+            }
+
+            dropdown.classList.toggle('active');
+        });
+
+        // Desktop: show on hover
+        if (window.innerWidth >= 768) {
+            dropdown.addEventListener('mouseenter', function() {
+                if (!categoriesLoaded) {
+                    loadCategories();
+                    categoriesLoaded = true;
+                }
             });
         }
-    });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+    }
+
+    /**
+     * Load categories from API
+     */
+    function loadCategories() {
+        var menu = document.getElementById('categoriesMenu');
+        if (!menu) return;
+
+        fetch('/api/categories.php?limit=10')
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success && data.categories.length > 0) {
+                    var html = '';
+
+                    data.categories.forEach(function(cat) {
+                        var icon = cat.icon || '📁';
+                        html += '<a href="/category/' + encodeURIComponent(cat.slug) + '" class="dropdown-item">' +
+                            '<span class="dropdown-item-icon">' + icon + '</span>' +
+                            '<span>' + escapeHtml(cat.name) + '</span>' +
+                        '</a>';
+                    });
+
+                    // Add "View All" link
+                    html += '<a href="/#categories" class="dropdown-item dropdown-view-all">' +
+                        '<span class="dropdown-item-icon">📋</span>' +
+                        '<span>View All Categories</span>' +
+                    '</a>';
+
+                    menu.innerHTML = html;
+                } else {
+                    menu.innerHTML = '<div class="dropdown-loading">No categories found</div>';
+                }
+            })
+            .catch(function(error) {
+                console.error('Failed to load categories:', error);
+                menu.innerHTML = '<div class="dropdown-loading">Failed to load</div>';
+            });
+    }
+
+    /**
+     * Header Search
+     */
+    function initHeaderSearch() {
+        var searchInput = document.getElementById('headerSearch');
+        var searchBtn = document.getElementById('headerSearchBtn');
+
+        if (!searchInput) return;
+
+        // Search on Enter
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performSearch();
+            }
+        });
+
+        // Search on button click
+        if (searchBtn) {
+            searchBtn.addEventListener('click', function() {
+                performSearch();
+            });
+        }
+
+        function performSearch() {
+            var query = searchInput.value.trim();
+            if (query) {
+                window.location.href = '/search?q=' + encodeURIComponent(query);
+            }
+        }
+    }
+
+    /**
+     * Smooth scroll for anchor links
+     */
+    function initSmoothScroll() {
+        document.querySelectorAll('a[href^="/#"]').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                var href = this.getAttribute('href');
+                var targetId = href.substring(2); // Remove "/#"
+
+                // If we're on the homepage, scroll to section
+                if (window.location.pathname === '/' || window.location.pathname === '/index.php') {
+                    e.preventDefault();
+                    var target = document.getElementById(targetId);
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+
+                        // Close mobile menu
+                        var navToggle = document.getElementById('navToggle');
+                        var mainNav = document.getElementById('mainNav');
+                        if (navToggle && mainNav) {
+                            navToggle.classList.remove('active');
+                            mainNav.classList.remove('active');
+                        }
+                    }
+                }
+                // Otherwise, let the browser navigate to homepage#section
+            });
+        });
+    }
+
+    /**
+     * Escape HTML
+     */
+    function escapeHtml(text) {
+        if (!text) return '';
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(text));
+        return div.innerHTML;
+    }
+
+})();
 </script>
