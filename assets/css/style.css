@@ -1048,3 +1048,329 @@ li {
         border: 1px solid #ddd;
     }
 }
+
+/* ==========================================================================
+   CALCULATOR COMPONENTS
+   Reusable classes for all calculator forms
+   ========================================================================== */
+
+/* Calculator Form Container */
+.calc-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+/* Form Row - for side-by-side fields */
+.calc-row {
+    display: grid;
+    gap: var(--space-md);
+}
+
+@media (min-width: 576px) {
+    .calc-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.calc-row-3 {
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+    .calc-row-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Field Group */
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.field-label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text);
+}
+
+.field-hint {
+    font-size: var(--text-xs);
+    color: var(--muted);
+}
+
+/* Field Input */
+.field-input {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--text-base);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-alt);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.field-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.field-input::placeholder {
+    color: var(--muted-light);
+}
+
+/* Input with unit suffix */
+.field-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.field-input-wrapper .field-input {
+    padding-right: 50px;
+}
+
+.field-unit {
+    position: absolute;
+    right: var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--muted);
+    pointer-events: none;
+}
+
+/* Select Input */
+.field-select {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--text-base);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-alt);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--space-md) center;
+    padding-right: 40px;
+}
+
+.field-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Radio/Checkbox Group */
+.field-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.field-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.field-option:hover {
+    background: var(--border-light);
+}
+
+.field-option.active,
+.field-option:has(input:checked) {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+}
+
+.field-option input {
+    margin: 0;
+}
+
+/* Calculator Button */
+.calc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-xl);
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: white;
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.calc-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.calc-btn:active {
+    transform: translateY(0);
+}
+
+.calc-btn:disabled {
+    background: var(--muted-light);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.calc-btn-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.calc-btn-secondary:hover {
+    background: var(--border-light);
+}
+
+/* Button Group */
+.calc-actions {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    margin-top: var(--space-sm);
+}
+
+/* Calculator Output/Result */
+.calc-output {
+    padding: var(--space-lg);
+    background: var(--bg);
+    border-radius: var(--radius-lg);
+    margin-top: var(--space-md);
+}
+
+.calc-output-title {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-md);
+}
+
+.calc-output-main {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.calc-output-value {
+    font-size: var(--text-4xl);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+}
+
+.calc-output-unit {
+    font-size: var(--text-lg);
+    color: var(--muted);
+}
+
+.calc-output-label {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+}
+
+.calc-output-message {
+    font-size: var(--text-base);
+    color: var(--text-light);
+    line-height: var(--leading-relaxed);
+}
+
+/* Result Status Colors */
+.calc-output-success {
+    border-left: 4px solid var(--success);
+}
+
+.calc-output-warning {
+    border-left: 4px solid var(--warning);
+}
+
+.calc-output-danger {
+    border-left: 4px solid var(--danger);
+}
+
+.calc-output-info {
+    border-left: 4px solid var(--info);
+}
+
+/* Result Details Table */
+.calc-details {
+    margin-top: var(--space-md);
+    border-top: 1px solid var(--border-light);
+    padding-top: var(--space-md);
+}
+
+.calc-detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.calc-detail-row:last-child {
+    border-bottom: none;
+}
+
+.calc-detail-label {
+    font-size: var(--text-sm);
+    color: var(--muted);
+}
+
+.calc-detail-value {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* Error State */
+.field-error .field-input,
+.field-error .field-select {
+    border-color: var(--danger);
+}
+
+.field-error-message {
+    font-size: var(--text-xs);
+    color: var(--danger);
+    margin-top: var(--space-xs);
+}
+
+/* Loading State */
+.calc-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+    color: var(--muted);
+}
+
+.calc-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
