@@ -54,7 +54,10 @@ $formData = [
     'intro_html' => '',
     'content_html' => '',
     'primary_keyword' => '',
-    'secondary_keywords' => ''
+    'secondary_keywords' => '',
+    // FAQs & Schema
+    'faq_json' => '[]',
+    'schema_json' => ''
 ];
 
 // Check if edit mode (id in query string)
@@ -83,7 +86,10 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             'intro_html' => $calculator['intro_html'] ?? '',
             'content_html' => $calculator['content_html'] ?? '',
             'primary_keyword' => $calculator['primary_keyword'] ?? '',
-            'secondary_keywords' => $calculator['secondary_keywords'] ?? ''
+            'secondary_keywords' => $calculator['secondary_keywords'] ?? '',
+            // FAQs & Schema
+            'faq_json' => $calculator['faq_json'] ?? '[]',
+            'schema_json' => $calculator['schema_json'] ?? ''
         ];
     } else {
         flash('Calculator not found!', 'error');
@@ -117,7 +123,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'intro_html' => $_POST['intro_html'] ?? '',
             'content_html' => $_POST['content_html'] ?? '',
             'primary_keyword' => trim($_POST['primary_keyword'] ?? ''),
-            'secondary_keywords' => trim($_POST['secondary_keywords'] ?? '')
+            'secondary_keywords' => trim($_POST['secondary_keywords'] ?? ''),
+            // FAQs & Schema
+            'faq_json' => $_POST['faq_json'] ?? '[]',
+            'schema_json' => $_POST['schema_json'] ?? ''
         ];
 
         $calculatorId = (int) ($_POST['calculator_id'] ?? 0);
@@ -365,6 +374,102 @@ input:checked + .toggle-slider:before {
     tab-size: 2;
 }
 
+/* FAQ Builder */
+.faq-list {
+    margin-bottom: var(--space-md);
+}
+
+.faq-item {
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin-bottom: var(--space-md);
+    position: relative;
+}
+
+.faq-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+}
+
+.faq-item-number {
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--muted);
+}
+
+.faq-remove-btn {
+    background: var(--danger-soft);
+    color: var(--danger);
+    border: none;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--text-xs);
+}
+
+.faq-remove-btn:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.faq-field {
+    margin-bottom: var(--space-sm);
+}
+
+.faq-field:last-child {
+    margin-bottom: 0;
+}
+
+.faq-field label {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--muted);
+    margin-bottom: 4px;
+}
+
+.faq-field input,
+.faq-field textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+}
+
+.faq-field textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.faq-add-btn {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px dashed var(--accent);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--text-sm);
+    width: 100%;
+    transition: all var(--transition-fast);
+}
+
+.faq-add-btn:hover {
+    background: var(--accent);
+    color: white;
+    border-style: solid;
+}
+
+.faq-empty {
+    text-align: center;
+    padding: var(--space-lg);
+    color: var(--muted);
+    font-size: var(--text-sm);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .form-row {
@@ -561,6 +666,52 @@ include BASE_PATH . '/admin/includes/header.php';
                     </div>
                 </div>
 
+                <!-- FAQs & Schema Section -->
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <h2 class="form-card-title">FAQs & Schema</h2>
+                    </div>
+                    <div class="form-card-body">
+                        <!-- FAQs Builder -->
+                        <div class="form-group">
+                            <label class="form-label">Frequently Asked Questions</label>
+                            <div class="form-hint" style="margin-bottom: var(--space-sm);">
+                                Add Q&A pairs for FAQ schema markup and page content
+                            </div>
+
+                            <div id="faqList" class="faq-list">
+                                <!-- FAQ items will be added here by JavaScript -->
+                            </div>
+
+                            <button type="button" class="faq-add-btn" onclick="addFaqItem()">
+                                + Add FAQ
+                            </button>
+
+                            <!-- Hidden input to store FAQ JSON -->
+                            <input type="hidden" name="faq_json" id="faqJsonInput" value="<?php echo htmlspecialchars($formData['faq_json']); ?>">
+                        </div>
+
+                        <!-- Schema JSON -->
+                        <div class="form-group" style="margin-top: var(--space-lg);">
+                            <label class="form-label" for="schema_json">
+                                Custom Schema JSON-LD
+                                <span style="font-weight: normal; color: var(--muted);">(optional)</span>
+                            </label>
+                            <textarea class="form-textarea code-textarea" id="schema_json" name="schema_json"
+                                      rows="10"
+                                      placeholder='{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Calculate BMI",
+  "step": [...]
+}'><?php echo htmlspecialchars($formData['schema_json']); ?></textarea>
+                            <div class="form-hint">
+                                Paste custom JSON-LD schema markup. FAQPage schema is auto-generated from FAQs above.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Status Section -->
                 <div class="form-card">
                     <div class="form-card-header">
@@ -699,6 +850,105 @@ document.getElementById('meta_title').addEventListener('input', function() {
 // Meta description counter
 document.getElementById('meta_desc').addEventListener('input', function() {
     updateCharCount('meta_desc', 'metaDescCount');
+});
+
+// =====================
+// FAQ Builder Functions
+// =====================
+
+var faqs = [];
+
+// Initialize FAQs from hidden input
+function initFaqs() {
+    try {
+        var jsonStr = document.getElementById('faqJsonInput').value;
+        if (jsonStr && jsonStr !== '[]') {
+            faqs = JSON.parse(jsonStr);
+        }
+    } catch (e) {
+        faqs = [];
+    }
+    renderFaqs();
+}
+
+// Render all FAQ items
+function renderFaqs() {
+    var container = document.getElementById('faqList');
+    container.innerHTML = '';
+
+    if (faqs.length === 0) {
+        container.innerHTML = '<div class=\"faq-empty\">No FAQs added yet. Click \"+ Add FAQ\" to create one.</div>';
+        return;
+    }
+
+    faqs.forEach(function(faq, index) {
+        var item = document.createElement('div');
+        item.className = 'faq-item';
+        item.innerHTML = '<div class=\"faq-item-header\">' +
+            '<span class=\"faq-item-number\">FAQ #' + (index + 1) + '</span>' +
+            '<button type=\"button\" class=\"faq-remove-btn\" onclick=\"removeFaqItem(' + index + ')\">Remove</button>' +
+            '</div>' +
+            '<div class=\"faq-field\">' +
+            '<label>Question</label>' +
+            '<input type=\"text\" value=\"' + escapeHtml(faq.question || '') + '\" ' +
+            'onchange=\"updateFaqItem(' + index + ', \\'question\\', this.value)\" ' +
+            'placeholder=\"e.g., What is BMI?\">' +
+            '</div>' +
+            '<div class=\"faq-field\">' +
+            '<label>Answer</label>' +
+            '<textarea onchange=\"updateFaqItem(' + index + ', \\'answer\\', this.value)\" ' +
+            'placeholder=\"e.g., BMI (Body Mass Index) is a measure of body fat...\">' + escapeHtml(faq.answer || '') + '</textarea>' +
+            '</div>';
+        container.appendChild(item);
+    });
+}
+
+// Add new FAQ item
+function addFaqItem() {
+    faqs.push({ question: '', answer: '' });
+    renderFaqs();
+    updateFaqJson();
+
+    // Focus on the new question input
+    var inputs = document.querySelectorAll('.faq-item:last-child input');
+    if (inputs.length > 0) {
+        inputs[0].focus();
+    }
+}
+
+// Remove FAQ item
+function removeFaqItem(index) {
+    faqs.splice(index, 1);
+    renderFaqs();
+    updateFaqJson();
+}
+
+// Update FAQ item field
+function updateFaqItem(index, field, value) {
+    if (faqs[index]) {
+        faqs[index][field] = value;
+        updateFaqJson();
+    }
+}
+
+// Update hidden input with FAQ JSON
+function updateFaqJson() {
+    document.getElementById('faqJsonInput').value = JSON.stringify(faqs);
+}
+
+// Escape HTML for safe insertion
+function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(text));
+    return div.innerHTML.replace(/\"/g, '&quot;');
+}
+
+// Initialize FAQs on page load
+initFaqs();
+
+// Update FAQ JSON before form submit
+document.getElementById('calculatorForm').addEventListener('submit', function() {
+    updateFaqJson();
 });
 ";
 
