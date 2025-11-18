@@ -41,40 +41,38 @@ $calculator = get_calculator_by_slug($slug, true);
 // 404 if not found or inactive
 if (!$calculator) {
     http_response_code(404);
-    $pageTitle = 'Calculator Not Found - CalcHub';
-    $metaDesc = 'The requested calculator was not found.';
-    $metaRobots = 'noindex, nofollow';
-    $is404 = true;
-} else {
-    // SEO data
-    $pageTitle = !empty($calculator['meta_title'])
-        ? $calculator['meta_title']
-        : $calculator['name'] . ' - Free Online Calculator | CalcHub';
+    $errorTitle = 'Calculator Not Found';
+    $errorMessage = 'The calculator you\'re looking for doesn\'t exist or has been removed.';
+    include BASE_PATH . '/404.php';
+    exit;
+}
 
-    $metaDesc = !empty($calculator['meta_desc'])
-        ? $calculator['meta_desc']
-        : (!empty($calculator['short_desc'])
-            ? $calculator['short_desc']
-            : 'Use our free ' . $calculator['name'] . ' online. Easy to use, instant results.');
+// SEO data
+$pageTitle = !empty($calculator['meta_title'])
+    ? $calculator['meta_title']
+    : $calculator['name'] . ' - Free Online Calculator | CalcHub';
 
-    $metaRobots = $calculator['is_indexed'] ? 'index, follow' : 'noindex, nofollow';
+$metaDesc = !empty($calculator['meta_desc'])
+    ? $calculator['meta_desc']
+    : (!empty($calculator['short_desc'])
+        ? $calculator['short_desc']
+        : 'Use our free ' . $calculator['name'] . ' online. Easy to use, instant results.');
 
-    // H1 title
-    $h1Title = !empty($calculator['h1_title'])
-        ? $calculator['h1_title']
-        : $calculator['name'];
+$metaRobots = $calculator['is_indexed'] ? 'index, follow' : 'noindex, nofollow';
 
-    // Ad settings
-    $adLayout = $calculator['ad_layout'] ?? 'medium';
-    $disableAds = (bool) ($calculator['disable_ads'] ?? false);
+// H1 title
+$h1Title = !empty($calculator['h1_title'])
+    ? $calculator['h1_title']
+    : $calculator['name'];
 
-    // Parse FAQs
-    $faqs = [];
-    if (!empty($calculator['faq_json'])) {
-        $faqs = json_decode($calculator['faq_json'], true) ?: [];
-    }
+// Ad settings
+$adLayout = $calculator['ad_layout'] ?? 'medium';
+$disableAds = (bool) ($calculator['disable_ads'] ?? false);
 
-    $is404 = false;
+// Parse FAQs
+$faqs = [];
+if (!empty($calculator['faq_json'])) {
+    $faqs = json_decode($calculator['faq_json'], true) ?: [];
 }
 
 // Site name
@@ -92,9 +90,7 @@ $siteName = 'CalcHub';
     <meta name="robots" content="<?php echo $metaRobots; ?>">
 
     <!-- Canonical URL -->
-    <?php if (!$is404): ?>
     <link rel="canonical" href="<?php echo 'https://' . ($_SERVER['HTTP_HOST'] ?? 'calchub.com') . '/calculator.php?slug=' . urlencode($calculator['slug']); ?>">
-    <?php endif; ?>
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
@@ -102,14 +98,14 @@ $siteName = 'CalcHub';
     <!-- Global Stylesheet -->
     <link rel="stylesheet" href="/assets/css/style.css">
 
-    <?php if (!$is404 && !empty($calculator['schema_json'])): ?>
+    <?php if (!empty($calculator['schema_json'])): ?>
     <!-- Custom Schema JSON-LD -->
     <script type="application/ld+json">
     <?php echo $calculator['schema_json']; ?>
     </script>
     <?php endif; ?>
 
-    <?php if (!$is404 && !empty($faqs)): ?>
+    <?php if (!empty($faqs)): ?>
     <!-- FAQ Schema JSON-LD -->
     <script type="application/ld+json">
     {
@@ -414,20 +410,6 @@ $siteName = 'CalcHub';
     <!-- Header -->
     <div data-include="/partials/header.html"></div>
 
-    <?php if ($is404): ?>
-    <!-- 404 Error Page -->
-    <main>
-        <div class="container">
-            <div class="error-page">
-                <div class="error-code">404</div>
-                <h1 class="error-title">Calculator Not Found</h1>
-                <p class="error-desc">The calculator you're looking for doesn't exist or has been removed.</p>
-                <a href="/" class="btn btn-primary">Back to Home</a>
-            </div>
-        </div>
-    </main>
-
-    <?php else: ?>
     <!-- Calculator Page -->
     <main class="calc-page">
         <div class="container">
@@ -527,7 +509,6 @@ $siteName = 'CalcHub';
 
         </div>
     </main>
-    <?php endif; ?>
 
     <!-- Footer -->
     <div data-include="/partials/footer.html"></div>
@@ -535,7 +516,6 @@ $siteName = 'CalcHub';
     <!-- Include Loader Script -->
     <script src="/assets/js/include.js"></script>
 
-    <?php if (!$is404): ?>
     <!-- Calculator Scripts -->
     <script>
         // Global calculator ID for analytics
@@ -564,7 +544,6 @@ $siteName = 'CalcHub';
     <?php if (!empty($calculator['js_file'])): ?>
     <!-- Calculator Specific JavaScript -->
     <script src="<?php echo htmlspecialchars($calculator['js_file']); ?>"></script>
-    <?php endif; ?>
     <?php endif; ?>
 
 </body>

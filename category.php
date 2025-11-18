@@ -41,20 +41,20 @@ $category = get_category_by_slug($slug, true);
 // 404 if not found or inactive
 if (!$category) {
     http_response_code(404);
-    $pageTitle = 'Category Not Found';
-    $metaDesc = 'The requested category was not found.';
-    $is404 = true;
-} else {
-    // Get calculators for this category
-    $calculators = get_calculators_by_category_slug($slug, true);
-
-    // SEO data
-    $pageTitle = $category['name'] . ' Calculators - CalcHub';
-    $metaDesc = !empty($category['short_desc'])
-        ? $category['short_desc']
-        : 'Free online ' . strtolower($category['name']) . ' calculators. Easy to use tools for all your calculation needs.';
-    $is404 = false;
+    $errorTitle = 'Category Not Found';
+    $errorMessage = 'The category you\'re looking for doesn\'t exist or has been removed.';
+    include BASE_PATH . '/404.php';
+    exit;
 }
+
+// Get calculators for this category
+$calculators = get_calculators_by_category_slug($slug, true);
+
+// SEO data
+$pageTitle = $category['name'] . ' Calculators - CalcHub';
+$metaDesc = !empty($category['short_desc'])
+    ? $category['short_desc']
+    : 'Free online ' . strtolower($category['name']) . ' calculators. Easy to use tools for all your calculation needs.';
 
 // Site name for SEO
 $siteName = 'CalcHub';
@@ -69,9 +69,6 @@ $siteName = 'CalcHub';
     <title><?php echo htmlspecialchars($pageTitle); ?></title>
     <meta name="description" content="<?php echo htmlspecialchars($metaDesc); ?>">
 
-    <?php if ($is404): ?>
-    <meta name="robots" content="noindex, nofollow">
-    <?php endif; ?>
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
@@ -252,20 +249,6 @@ $siteName = 'CalcHub';
     <!-- Header -->
     <div data-include="/partials/header.html"></div>
 
-    <?php if ($is404): ?>
-    <!-- 404 Error Page -->
-    <main>
-        <div class="container">
-            <div class="error-page">
-                <div class="error-code">404</div>
-                <h1 class="error-title">Category Not Found</h1>
-                <p class="error-desc">The category you're looking for doesn't exist or has been removed.</p>
-                <a href="/" class="btn btn-primary">Back to Home</a>
-            </div>
-        </div>
-    </main>
-
-    <?php else: ?>
     <!-- Category Header -->
     <header class="category-header">
         <div class="container">
@@ -316,7 +299,6 @@ $siteName = 'CalcHub';
             <?php endif; ?>
         </div>
     </main>
-    <?php endif; ?>
 
     <!-- Footer -->
     <div data-include="/partials/footer.html"></div>
