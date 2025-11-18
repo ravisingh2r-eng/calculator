@@ -46,7 +46,15 @@ $formData = [
     'is_indexed' => 1,
     'show_in_sitemap' => 1,
     'ad_layout' => 'medium',
-    'disable_ads' => 0
+    'disable_ads' => 0,
+    // SEO Content fields
+    'meta_title' => '',
+    'meta_desc' => '',
+    'h1_title' => '',
+    'intro_html' => '',
+    'content_html' => '',
+    'primary_keyword' => '',
+    'secondary_keywords' => ''
 ];
 
 // Check if edit mode (id in query string)
@@ -67,7 +75,15 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             'is_indexed' => $calculator['is_indexed'],
             'show_in_sitemap' => $calculator['show_in_sitemap'],
             'ad_layout' => $calculator['ad_layout'] ?? 'medium',
-            'disable_ads' => $calculator['disable_ads'] ?? 0
+            'disable_ads' => $calculator['disable_ads'] ?? 0,
+            // SEO Content fields
+            'meta_title' => $calculator['meta_title'] ?? '',
+            'meta_desc' => $calculator['meta_desc'] ?? '',
+            'h1_title' => $calculator['h1_title'] ?? '',
+            'intro_html' => $calculator['intro_html'] ?? '',
+            'content_html' => $calculator['content_html'] ?? '',
+            'primary_keyword' => $calculator['primary_keyword'] ?? '',
+            'secondary_keywords' => $calculator['secondary_keywords'] ?? ''
         ];
     } else {
         flash('Calculator not found!', 'error');
@@ -93,7 +109,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'is_indexed' => isset($_POST['is_indexed']) ? 1 : 0,
             'show_in_sitemap' => isset($_POST['show_in_sitemap']) ? 1 : 0,
             'ad_layout' => $_POST['ad_layout'] ?? 'medium',
-            'disable_ads' => isset($_POST['disable_ads']) ? 1 : 0
+            'disable_ads' => isset($_POST['disable_ads']) ? 1 : 0,
+            // SEO Content fields
+            'meta_title' => trim($_POST['meta_title'] ?? ''),
+            'meta_desc' => trim($_POST['meta_desc'] ?? ''),
+            'h1_title' => trim($_POST['h1_title'] ?? ''),
+            'intro_html' => $_POST['intro_html'] ?? '',
+            'content_html' => $_POST['content_html'] ?? '',
+            'primary_keyword' => trim($_POST['primary_keyword'] ?? ''),
+            'secondary_keywords' => trim($_POST['secondary_keywords'] ?? '')
         ];
 
         $calculatorId = (int) ($_POST['calculator_id'] ?? 0);
@@ -333,6 +357,14 @@ input:checked + .toggle-slider:before {
     margin-bottom: 0;
 }
 
+/* Code Textarea */
+.code-textarea {
+    font-family: "Monaco", "Menlo", "Consolas", monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    tab-size: 2;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .form-row {
@@ -437,6 +469,94 @@ include BASE_PATH . '/admin/includes/header.php';
                                    value="<?php echo htmlspecialchars($formData['js_file']); ?>"
                                    placeholder="e.g., /assets/js/calculators/bmi.js">
                             <div class="form-hint">Path to the calculator's JavaScript file</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEO Content Section -->
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <h2 class="form-card-title">SEO & Content</h2>
+                    </div>
+                    <div class="form-card-body">
+                        <!-- Meta Title -->
+                        <div class="form-group">
+                            <label class="form-label" for="meta_title">Meta Title</label>
+                            <input type="text" class="form-input" id="meta_title" name="meta_title"
+                                   maxlength="70"
+                                   value="<?php echo htmlspecialchars($formData['meta_title']); ?>"
+                                   placeholder="SEO title for search engines (max 60-70 chars)">
+                            <div class="form-hint">
+                                <span id="metaTitleCount"><?php echo strlen($formData['meta_title']); ?></span>/70 characters
+                            </div>
+                        </div>
+
+                        <!-- Meta Description -->
+                        <div class="form-group">
+                            <label class="form-label" for="meta_desc">Meta Description</label>
+                            <textarea class="form-textarea" id="meta_desc" name="meta_desc"
+                                      rows="3" maxlength="160"
+                                      placeholder="SEO description for search results (max 150-160 chars)"><?php echo htmlspecialchars($formData['meta_desc']); ?></textarea>
+                            <div class="form-hint">
+                                <span id="metaDescCount"><?php echo strlen($formData['meta_desc']); ?></span>/160 characters
+                            </div>
+                        </div>
+
+                        <!-- H1 Title -->
+                        <div class="form-group">
+                            <label class="form-label" for="h1_title">H1 Title</label>
+                            <input type="text" class="form-input" id="h1_title" name="h1_title"
+                                   maxlength="100"
+                                   value="<?php echo htmlspecialchars($formData['h1_title']); ?>"
+                                   placeholder="Main heading on the page (can differ from meta title)">
+                            <div class="form-hint">Leave empty to use calculator name as H1</div>
+                        </div>
+
+                        <!-- Primary Keyword -->
+                        <div class="form-group">
+                            <label class="form-label" for="primary_keyword">Primary Keyword</label>
+                            <input type="text" class="form-input" id="primary_keyword" name="primary_keyword"
+                                   maxlength="100"
+                                   value="<?php echo htmlspecialchars($formData['primary_keyword']); ?>"
+                                   placeholder="e.g., bmi calculator">
+                            <div class="form-hint">Main keyword you want to rank for</div>
+                        </div>
+
+                        <!-- Secondary Keywords -->
+                        <div class="form-group">
+                            <label class="form-label" for="secondary_keywords">Secondary Keywords</label>
+                            <textarea class="form-textarea" id="secondary_keywords" name="secondary_keywords"
+                                      rows="2" maxlength="500"
+                                      placeholder="body mass index, bmi check, weight calculator"><?php echo htmlspecialchars($formData['secondary_keywords']); ?></textarea>
+                            <div class="form-hint">Comma-separated list of related keywords</div>
+                        </div>
+
+                        <!-- Intro HTML -->
+                        <div class="form-group">
+                            <label class="form-label" for="intro_html">
+                                Intro HTML
+                                <span style="font-weight: normal; color: var(--muted);">(appears above calculator)</span>
+                            </label>
+                            <textarea class="form-textarea code-textarea" id="intro_html" name="intro_html"
+                                      rows="6"
+                                      placeholder="<p>Brief introduction about this calculator...</p>"><?php echo htmlspecialchars($formData['intro_html']); ?></textarea>
+                            <div class="form-hint">HTML allowed. Short intro paragraph shown before the calculator.</div>
+                        </div>
+
+                        <!-- Content HTML -->
+                        <div class="form-group">
+                            <label class="form-label" for="content_html">
+                                Content HTML
+                                <span style="font-weight: normal; color: var(--muted);">(appears below calculator)</span>
+                            </label>
+                            <textarea class="form-textarea code-textarea" id="content_html" name="content_html"
+                                      rows="12"
+                                      placeholder="<h2>How to Use This Calculator</h2>
+<p>Step-by-step instructions...</p>
+
+<h2>Understanding the Results</h2>
+<p>Explanation of what the results mean...</p>"><?php echo htmlspecialchars($formData['content_html']); ?></textarea>
+                            <div class="form-hint">HTML allowed. Detailed content, explanations, formulas, examples. Good for SEO.</div>
                         </div>
                     </div>
                 </div>
@@ -561,6 +681,25 @@ document.getElementById('slug').addEventListener('input', function() {
 
 // Update preview on page load
 updateSlugPreview(document.getElementById('slug').value);
+
+// Character counters for SEO fields
+function updateCharCount(inputId, counterId) {
+    var input = document.getElementById(inputId);
+    var counter = document.getElementById(counterId);
+    if (input && counter) {
+        counter.textContent = input.value.length;
+    }
+}
+
+// Meta title counter
+document.getElementById('meta_title').addEventListener('input', function() {
+    updateCharCount('meta_title', 'metaTitleCount');
+});
+
+// Meta description counter
+document.getElementById('meta_desc').addEventListener('input', function() {
+    updateCharCount('meta_desc', 'metaDescCount');
+});
 ";
 
 // Include admin footer
