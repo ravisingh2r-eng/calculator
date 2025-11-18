@@ -1,7 +1,7 @@
 /**
  * Calculator Hub - Main Application JavaScript
  *
- * Handles global functionality like search, analytics tracking, etc.
+ * Handles global functionality like search, analytics tracking, FAQ rendering
  * All calculator-specific logic will be in separate files.
  *
  * @author  Your Name
@@ -25,6 +25,9 @@
         // Data
         calculators: [],
 
+        // Debounce timer
+        debounceTimer: null,
+
         /**
          * Initialize search
          */
@@ -43,8 +46,6 @@
 
             // Bind events
             this.bindEvents();
-
-            console.log('Search initialized with', this.calculators.length, 'items');
         },
 
         /**
@@ -53,15 +54,21 @@
         bindEvents: function() {
             const self = this;
 
-            // Input event - search as user types
-            this.input.addEventListener('input', function(e) {
+            // Input event - search as user types (with debounce)
+            this.input.addEventListener('keyup', function(e) {
                 const query = e.target.value.trim();
 
-                if (query.length >= 2) {
-                    self.search(query);
-                } else {
-                    self.hideResults();
-                }
+                // Clear previous timer
+                clearTimeout(self.debounceTimer);
+
+                // Debounce API calls
+                self.debounceTimer = setTimeout(function() {
+                    if (query.length >= 2) {
+                        self.search(query);
+                    } else {
+                        self.hideResults();
+                    }
+                }, 300);
             });
 
             // Focus event - show results if there's a query
@@ -73,12 +80,14 @@
             });
 
             // Button click
-            this.button.addEventListener('click', function() {
-                const query = self.input.value.trim();
-                if (query) {
-                    self.performSearch(query);
-                }
-            });
+            if (this.button) {
+                this.button.addEventListener('click', function() {
+                    const query = self.input.value.trim();
+                    if (query) {
+                        self.performSearch(query);
+                    }
+                });
+            }
 
             // Enter key
             this.input.addEventListener('keydown', function(e) {
@@ -110,23 +119,56 @@
          * @param {string} query - Search query
          */
         search: function(query) {
+            const self = this;
             const lowerQuery = query.toLowerCase();
 
-            // Filter calculators
-            const matches = this.calculators.filter(function(item) {
-                return item.name.toLowerCase().includes(lowerQuery) ||
-                       item.category.toLowerCase().includes(lowerQuery);
-            });
+            // If we have local data, use it first
+            if (this.calculators.length > 0) {
+                const matches = this.calculators.filter(function(item) {
+                    return item.name.toLowerCase().includes(lowerQuery) ||
+                           (item.category && item.category.toLowerCase().includes(lowerQuery));
+                });
 
-            // Show results
-            if (matches.length > 0) {
-                this.showResults(matches.slice(0, 8)); // Max 8 results
+                if (matches.length > 0) {
+                    this.showResults(matches.slice(0, 8));
+                } else {
+                    this.showNoResults(query);
+                }
             } else {
-                this.showNoResults(query);
+                // Call API for search
+                this.searchAPI(query);
             }
+        },
 
-            // Log search for debugging
-            console.log('Search:', query, '- Found:', matches.length, 'results');
+        /**
+         * Search via API
+         *
+         * @param {string} query - Search query
+         */
+        searchAPI: function(query) {
+            const self = this;
+
+            // Show loading
+            this.results.innerHTML = '<div class="search-result-item" style="justify-content: center; color: var(--muted);">Searching...</div>';
+            this.results.classList.add('active');
+
+            // Fetch from API
+            fetch('/api/search.php?q=' + encodeURIComponent(query))
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.results && data.results.length > 0) {
+                        self.showResults(data.results.slice(0, 8));
+                    } else {
+                        self.showNoResults(query);
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Search error:', error);
+                    // Fallback to local search if API fails
+                    self.showNoResults(query);
+                });
         },
 
         /**
@@ -138,13 +180,15 @@
             let html = '';
 
             items.forEach(function(item) {
-                html += `
-                    <a href="/${item.slug}" class="search-result-item">
-                        <span class="search-result-icon">${item.icon}</span>
-                        <span class="search-result-name">${item.name}</span>
-                        <span class="search-result-category">${item.category}</span>
-                    </a>
-                `;
+                const icon = item.icon || item.category_icon || '🧮';
+                const category = item.category || item.category_name || '';
+                const slug = item.slug || '';
+
+                html += '<a href="/calculator.php?slug=' + encodeURIComponent(slug) + '" class="search-result-item">' +
+                    '<span class="search-result-icon">' + icon + '</span>' +
+                    '<span class="search-result-name">' + escapeHtml(item.name) + '</span>' +
+                    '<span class="search-result-category">' + escapeHtml(category) + '</span>' +
+                '</a>';
             });
 
             this.results.innerHTML = html;
@@ -157,11 +201,9 @@
          * @param {string} query - Search query
          */
         showNoResults: function(query) {
-            this.results.innerHTML = `
-                <div class="search-result-item" style="justify-content: center; color: var(--muted);">
-                    No calculators found for "${query}"
-                </div>
-            `;
+            this.results.innerHTML = '<div class="search-result-item" style="justify-content: center; color: var(--muted);">' +
+                'No calculators found for "' + escapeHtml(query) + '"' +
+            '</div>';
             this.results.classList.add('active');
         },
 
@@ -178,45 +220,135 @@
          * @param {string} query - Search query
          */
         performSearch: function(query) {
-            // Log the search action
-            console.log('Performing search for:', query);
-
-            // TODO: Navigate to search results page
-            // window.location.href = '/search?q=' + encodeURIComponent(query);
-
-            // For now, just show in console
-            alert('Search submitted: ' + query + '\n\nSearch results page will be implemented later.');
+            // Navigate to search results page
+            window.location.href = '/search.php?q=' + encodeURIComponent(query);
         }
     };
 
     /**
-     * Analytics Tracking (placeholder)
-     *
-     * Will be used for custom analytics + Google Analytics events
+     * FAQ Rendering for Calculator Pages
+     */
+    const FAQ = {
+        container: null,
+
+        /**
+         * Initialize FAQ rendering
+         */
+        init: function() {
+            this.container = document.getElementById('calculator-faq');
+
+            // Check if FAQ container exists and we have FAQ data
+            if (!this.container) {
+                return;
+            }
+
+            // Check if FAQs are passed via window object
+            if (window.CALCULATOR_FAQS && window.CALCULATOR_FAQS.length > 0) {
+                this.render(window.CALCULATOR_FAQS);
+            }
+        },
+
+        /**
+         * Render FAQ items
+         *
+         * @param {Array} faqs - Array of FAQ objects with question and answer
+         */
+        render: function(faqs) {
+            let html = '<h2 class="faq-title">Frequently Asked Questions</h2>';
+
+            faqs.forEach(function(faq, index) {
+                if (faq.question && faq.answer) {
+                    html += '<div class="faq-item" id="faq-' + index + '">' +
+                        '<div class="faq-question" onclick="CalcHub.FAQ.toggle(' + index + ')">' +
+                            '<span>' + escapeHtml(faq.question) + '</span>' +
+                            '<span class="faq-toggle">▼</span>' +
+                        '</div>' +
+                        '<div class="faq-answer">' + escapeHtml(faq.answer).replace(/\n/g, '<br>') + '</div>' +
+                    '</div>';
+                }
+            });
+
+            this.container.innerHTML = html;
+
+            // Open first FAQ by default
+            var firstFaq = document.getElementById('faq-0');
+            if (firstFaq) {
+                firstFaq.classList.add('active');
+            }
+        },
+
+        /**
+         * Toggle FAQ item
+         *
+         * @param {number} index - FAQ index
+         */
+        toggle: function(index) {
+            var item = document.getElementById('faq-' + index);
+            if (item) {
+                item.classList.toggle('active');
+            }
+        }
+    };
+
+    /**
+     * Analytics & Event Logging
      */
     const Analytics = {
+        /**
+         * Log event to server
+         *
+         * @param {number} calcId - Calculator ID
+         * @param {string} eventType - Event type (view, calculate, etc.)
+         * @param {object} data - Additional data
+         */
+        logEvent: function(calcId, eventType, data) {
+            // Prepare payload
+            var payload = {
+                calculator_id: calcId,
+                event_type: eventType,
+                data: data || {}
+            };
+
+            // Send to API
+            fetch('/api/log_event.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(result) {
+                if (result.success) {
+                    console.log('Event logged:', eventType, 'for calculator', calcId);
+                }
+            })
+            .catch(function(error) {
+                console.error('Failed to log event:', error);
+            });
+        },
+
         /**
          * Track page view
          */
         trackPageView: function() {
-            console.log('Page view:', window.location.pathname);
-
-            // TODO: Send to custom analytics endpoint
-            // fetch('/api/track.php', {
-            //     method: 'POST',
-            //     body: JSON.stringify({ type: 'pageview', path: window.location.pathname })
-            // });
+            // If on calculator page, log view event
+            if (window.CALCULATOR_ID) {
+                this.logEvent(window.CALCULATOR_ID, 'view');
+            }
         },
 
         /**
-         * Track calculator usage
+         * Track calculator usage (when user performs calculation)
          *
-         * @param {string} calculatorSlug - Calculator identifier
+         * @param {object} data - Calculation data
          */
-        trackCalculatorUse: function(calculatorSlug) {
-            console.log('Calculator used:', calculatorSlug);
-
-            // TODO: Send to custom analytics endpoint
+        trackCalculation: function(data) {
+            if (window.CALCULATOR_ID) {
+                this.logEvent(window.CALCULATOR_ID, 'calculate', data);
+            }
         },
 
         /**
@@ -225,9 +357,7 @@
          * @param {string} query - Search query
          */
         trackSearch: function(query) {
-            console.log('Search query:', query);
-
-            // TODO: Send to custom analytics endpoint
+            this.logEvent(0, 'search', { query: query });
         }
     };
 
@@ -257,14 +387,30 @@
     };
 
     /**
+     * Utility: Escape HTML
+     */
+    function escapeHtml(text) {
+        if (!text) return '';
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(text));
+        return div.innerHTML;
+    }
+
+    /**
+     * Global logEvent function for external use
+     */
+    window.logEvent = function(calcId, eventType, data) {
+        Analytics.logEvent(calcId, eventType, data);
+    };
+
+    /**
      * Initialize everything when DOM is ready
      */
     function init() {
         Search.init();
+        FAQ.init();
         SmoothScroll.init();
         Analytics.trackPageView();
-
-        console.log('CalcHub App initialized');
     }
 
     // Run when DOM is ready
@@ -274,10 +420,12 @@
         init();
     }
 
-    // Expose for external use if needed
+    // Expose for external use
     window.CalcHub = {
         Search: Search,
-        Analytics: Analytics
+        FAQ: FAQ,
+        Analytics: Analytics,
+        logEvent: Analytics.logEvent.bind(Analytics)
     };
 
 })();
@@ -285,9 +433,18 @@
 /**
  * USAGE:
  *
- * Search is automatic - just include this file and have the search elements.
+ * Search is automatic - include this file and have search elements.
  *
- * Manual analytics tracking:
- *   CalcHub.Analytics.trackCalculatorUse('bmi');
- *   CalcHub.Analytics.trackSearch('loan calculator');
+ * For calculator pages, set these globals before including this script:
+ *   window.CALCULATOR_ID = 5;
+ *   window.CALCULATOR_SLUG = 'bmi';
+ *   window.CALCULATOR_FAQS = [{ question: '...', answer: '...' }];
+ *
+ * Manual event logging:
+ *   logEvent(calculatorId, 'view');
+ *   logEvent(calculatorId, 'calculate', { result: 22.5 });
+ *
+ * Or via CalcHub object:
+ *   CalcHub.Analytics.trackCalculation({ bmi: 22.5 });
+ *   CalcHub.FAQ.toggle(0);
  */
