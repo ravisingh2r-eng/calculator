@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Basic Meta Tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- Page Title -->
+    <title>Test Page - Header/Footer Partials Demo</title>
+
+    <!-- Base Styles -->
+    <style>
+        /* CSS Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Container */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px 0;
+        }
+
+        /* Demo Box */
+        .demo-box {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .demo-box h1 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        .demo-box h2 {
+            color: #34495e;
+            margin: 20px 0 10px;
+            font-size: 1.3rem;
+        }
+
+        .demo-box p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .demo-box ul {
+            margin-left: 20px;
+            color: #666;
+        }
+
+        .demo-box li {
+            margin-bottom: 8px;
+        }
+
+        .demo-box code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #e74c3c;
+        }
+
+        .demo-box pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            margin: 15px 0;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin: 10px 0;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #e8f4fc;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: #2980b9;
+        }
+
+        /* Loading Placeholder Styles */
+        .partial-loading {
+            min-height: 60px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .partial-loading::after {
+            content: 'Loading...';
+            color: #999;
+        }
+
+        /* Tablet & Desktop */
+        @media (min-width: 768px) {
+            .demo-box {
+                padding: 40px;
+            }
+
+            .demo-box h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Partial - Will be loaded by include.js -->
+    <div data-include="/partials/header.html"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+
+            <!-- Demo Information -->
+            <div class="demo-box">
+                <h1>Partials System Test Page</h1>
+
+                <span class="status-badge">✅ Include.js Working</span>
+
+                <p>
+                    Yeh page demonstrate karta hai ki header aur footer partials kaise load hote hain
+                    <code>include.js</code> ke through.
+                </p>
+
+                <h2>How It Works</h2>
+                <ul>
+                    <li>Page load hone par <code>include.js</code> automatically run hota hai</li>
+                    <li>Yeh script <code>data-include</code> attribute wale elements dhundhta hai</li>
+                    <li>Specified HTML file fetch karke element me inject karta hai</li>
+                    <li>Scripts jo partial me hain woh bhi execute hote hain</li>
+                </ul>
+
+                <h2>Usage Example</h2>
+                <pre>&lt;!-- Header include karne ke liye --&gt;
+&lt;div data-include="/partials/header.html"&gt;&lt;/div&gt;
+
+&lt;!-- Footer include karne ke liye --&gt;
+&lt;div data-include="/partials/footer.html"&gt;&lt;/div&gt;
+
+&lt;!-- Include.js load karo (body ke end me) --&gt;
+&lt;script src="/assets/js/include.js"&gt;&lt;/script&gt;</pre>
+
+                <h2>Features</h2>
+                <ul>
+                    <li><strong>Vanilla JavaScript</strong> - No jQuery or other dependencies</li>
+                    <li><strong>Caching</strong> - Partials cache hote hain for better performance</li>
+                    <li><strong>Error Handling</strong> - Failed loads show error message</li>
+                    <li><strong>Events</strong> - Custom events fire on load/error</li>
+                    <li><strong>Script Execution</strong> - Inline scripts in partials work correctly</li>
+                </ul>
+
+                <div class="info-box">
+                    <p>
+                        <strong>Note:</strong> Local file system par test karne ke liye local server chahiye
+                        (CORS restrictions ki wajah se). Use: <code>php -S localhost:8000</code>
+                    </p>
+                </div>
+
+                <h2>Advanced Usage</h2>
+                <pre>// Manual reload all partials
+PartialInclude.reloadAll();
+
+// Clear cache
+PartialInclude.clearCache();
+
+// Listen for load complete
+element.addEventListener('partial:loaded', function(e) {
+    console.log('Loaded:', e.detail.url);
+});</pre>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer Partial - Will be loaded by include.js -->
+    <div data-include="/partials/footer.html"></div>
+
+    <!-- Include.js - Loads all partials automatically -->
+    <script src="/assets/js/include.js"></script>
+
+</body>
+</html>

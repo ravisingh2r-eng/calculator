@@ -1,0 +1,205 @@
+<!--
+    Footer Partial - Reusable across all pages
+
+    Usage: <div data-include="/partials/footer.html"></div>
+
+    Contains:
+    - Footer navigation links
+    - Category quick links
+    - Social links
+    - Copyright notice
+    - Made with love line
+-->
+
+<footer class="footer">
+    <div class="container">
+
+        <!-- Footer Top - Links Grid -->
+        <div class="footer-grid">
+
+            <!-- Column 1: About -->
+            <div class="footer-col">
+                <h3 class="footer-title">CalcHub</h3>
+                <p class="footer-desc">
+                    Free online calculators for math, finance, health, and everyday calculations.
+                    Fast, accurate, and mobile-friendly.
+                </p>
+            </div>
+
+            <!-- Column 2: Quick Links -->
+            <div class="footer-col">
+                <h3 class="footer-title">Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/terms">Terms of Use</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 3: Popular Categories -->
+            <div class="footer-col">
+                <h3 class="footer-title">Categories</h3>
+                <ul class="footer-links">
+                    <li><a href="/categories/math">Math Calculators</a></li>
+                    <li><a href="/categories/finance">Finance Calculators</a></li>
+                    <li><a href="/categories/health">Health Calculators</a></li>
+                    <li><a href="/categories/conversion">Unit Converters</a></li>
+                    <li><a href="/categories/date">Date & Time</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 4: Popular Calculators -->
+            <div class="footer-col">
+                <h3 class="footer-title">Popular</h3>
+                <ul class="footer-links">
+                    <li><a href="/calculator/bmi">BMI Calculator</a></li>
+                    <li><a href="/calculator/loan">Loan Calculator</a></li>
+                    <li><a href="/calculator/age">Age Calculator</a></li>
+                    <li><a href="/calculator/percentage">Percentage Calculator</a></li>
+                    <li><a href="/calculator/gst">GST Calculator</a></li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+
+            <!-- Copyright -->
+            <p class="copyright">
+                &copy; <span id="currentYear">2025</span> CalcHub. All rights reserved.
+            </p>
+
+            <!-- Made with Love -->
+            <p class="made-with-love">
+                Made with ❤️ in India
+            </p>
+
+        </div>
+
+    </div>
+</footer>
+
+<!-- Footer Styles (will move to main CSS file later) -->
+<style>
+    /* Footer Main */
+    .footer {
+        background: #2c3e50;
+        color: #ecf0f1;
+        padding: 40px 0 20px;
+        margin-top: 50px;
+    }
+
+    /* Footer Grid */
+    .footer-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 30px;
+        padding-bottom: 30px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Footer Column */
+    .footer-col {
+        text-align: center;
+    }
+
+    .footer-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #fff;
+    }
+
+    .footer-desc {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: #bdc3c7;
+    }
+
+    /* Footer Links */
+    .footer-links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer-links li {
+        margin-bottom: 8px;
+    }
+
+    .footer-links a {
+        color: #bdc3c7;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+        color: #3498db;
+    }
+
+    /* Footer Bottom */
+    .footer-bottom {
+        padding-top: 20px;
+        text-align: center;
+    }
+
+    .copyright {
+        font-size: 0.85rem;
+        color: #95a5a6;
+        margin-bottom: 8px;
+    }
+
+    .made-with-love {
+        font-size: 0.85rem;
+        color: #95a5a6;
+    }
+
+    /* Tablet Styles */
+    @media (min-width: 576px) {
+        .footer-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .footer-col {
+            text-align: left;
+        }
+    }
+
+    /* Desktop Styles */
+    @media (min-width: 768px) {
+        .footer {
+            padding: 50px 0 25px;
+        }
+
+        .footer-grid {
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copyright,
+        .made-with-love {
+            margin: 0;
+        }
+    }
+</style>
+
+<!-- Dynamic Year Script -->
+<script>
+    // Update copyright year automatically
+    document.addEventListener('DOMContentLoaded', function() {
+        const yearSpan = document.getElementById('currentYear');
+        if (yearSpan) {
+            yearSpan.textContent = new Date().getFullYear();
+        }
+    });
+</script>
